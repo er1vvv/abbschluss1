@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflexions-Radar - Systemische Selbstreflexion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn.export-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            font-weight: bold;
+        }
+
+        .btn.export-btn:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+        }
+
+        .workspace {
+            position: relative;
+            height: calc(100vh - 100px);
+            overflow: hidden;
+        }
+
+        .team-member {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+            user-select: none;
+            width: 100px;
+            height: 100px;
+        }
+
+        .team-member:hover {
+            transform: scale(1.05);
+        }
+
+        .stress-1 { background: linear-gradient(135deg, #2E7D32, #4CAF50); }
+        .stress-2 { background: linear-gradient(135deg, #689F38, #8BC34A); }
+        .stress-3 { background: linear-gradient(135deg, #FF9800, #FFB74D); }
+        .stress-4 { background: linear-gradient(135deg, #F57C00, #FF8F00); }
+        .stress-5 { 
+            background: linear-gradient(135deg, #F44336, #EF5350);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.4);
+            transform-origin: left center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .connection-line:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .connection-emoji {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+
+        .connection-emoji:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup h3 {
+            color: #81C784;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .popup p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+            max-width: 250px;
+        }
+
+        .legend h4 {
+            margin-bottom: 15px;
+            color: #81C784;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .legend-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .stats {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+        }
+
+        .text-response-area {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .char-counter.warning { color: #FF9800; }
+        .char-counter.error { color: #F44336; }
+
+        .ai-response {
+            background: rgba(129, 199, 132, 0.2);
+            border-left: 4px solid #81C784;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-style: italic;
+        }
+
+        .session-summary {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .session-header {
+            background: rgba(129, 199, 132, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .session-section {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+            padding-left: 15px;
+        }
+
+        .session-section h4 {
+            color: #81C784;
+            margin-bottom: 8px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #F44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .team-member:hover .delete-btn {
+            display: block;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 10px 15px;
+            }
+            
+            .controls {
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .btn {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+            
+            .team-member {
+                width: 60px;
+                height: 60px;
+                font-size: 10px;
+            }
+            
+            .legend, .stats {
+                position: relative;
+                margin: 10px;
+                max-width: none;
+            }
+            
+            .workspace {
+                height: auto;
+                min-height: 400px;
+                padding: 10px;
+            }
+            
+            .popup {
+                width: 95%;
+                max-width: 400px;
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🎯 Reflexions-Radar</div>
+        <div class="controls">
+            <button class="btn" onclick="showReflection()">💭 Reflexion</button>
+            <button class="btn" onclick="showScaling()">📊 Skalierung</button>
+            <button class="btn" onclick="showWonder()">✨ Wunderfrage</button>
+            <button class="btn" onclick="addPerson()">+ Person</button>
+            <button class="btn" onclick="goBack()" id="backBtn">↩️ Zurück</button>
+            <button class="btn" onclick="goForward()" id="forwardBtn">↪️ Vorwärts</button>
+            <button class="btn" onclick="showSessionSummary()">📄 Session</button>
+            <button class="btn export-btn" onclick="exportSystemicWorksheet()">📋 Arbeitsblatt</button>
+            <button class="btn" onclick="resetAll()">🔄 Reset</button>
+        </div>
+    </div>
+
+    <div class="workspace" id="workspace">
+        <div class="legend">
+            <h4>Stress-Level</h4>
+            <div class="legend-item">
+                <div class="legend-circle stress-1"></div>
+                <span>1 - Sehr entspannt</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-circle stress-2"></div>
+                <span>2 - Entspannt</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-circle stress-3"></div>
+                <span>3 - Angespannt</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-circle stress-4"></div>
+                <span>4 - Sehr angespannt</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-circle stress-5"></div>
+                <span>5 - Überlastet</span>
+            </div>
+            <div style="margin-top: 15px; font-size: 11px; color: #ccc;">
+                💡 Klick = Stress ändern<br>
+                🖱️ Ziehen = Position ändern<br>
+                🔗 Linie klicken = Beziehung bearbeiten
+            </div>
+        </div>
+
+        <div class="stats">
+            <h4 style="color: #81C784; margin-bottom: 10px;">Reflexions-Impulse</h4>
+            <div style="font-size: 12px; line-height: 1.4;">
+                <div>Durchschnittlicher Stress: <span id="avgStress">Mittel</span></div>
+                <div>Belastete Bereiche: <span id="overloaded">1</span></div>
+                <div style="margin-top: 10px; color: #ccc;">
+                    💭 Betrachte deine Position<br>
+                    🎯 Erkenne Muster<br>
+                    🌱 Reflektiere deinen Beitrag
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let members = [
+            { id: 1, name: 'Anna\n(Projektleitung)', x: 200, y: 150, stress: 4 },
+            { id: 2, name: 'Marcus\n(Entwicklung)', x: 400, y: 250, stress: 3 },
+            { id: 3, name: 'Sarah\n(Design)', x: 300, y: 400, stress: 1 },
+            { id: 4, name: 'Tom\n(QA)', x: 600, y: 200, stress: 2 }
+        ];
+        
+        let connections = [];
+        let nextId = 5;
+        let isDragging = false;
+        let dragElement = null;
+        let dragOffset = { x: 0, y: 0 };
+        let userResponses = [];
+        let stateHistory = [];
+        let currentStateIndex = -1;
+        let currentSessionId = null;
+
+        // Enhanced question arrays with more systemically oriented questions
+        const reflections = [
+            "🪞 Welche Rolle übernimmst du normalerweise in stressigen Teamsituationen?",
+            "💭 Was ist dein automatisches Verhalten, wenn im Team Spannungen entstehen?",
+            "🌱 Wofür ist deine Position im Team nützlich - auch wenn sie manchmal anstrengend ist?",
+            "👁️ Welche Muster bei dir wiederholen sich in verschiedenen Teams?",
+            "💪 Wann warst du zuletzt überrascht von deiner eigenen Wirkung im Team?",
+            "🛡️ Was brauchst du, um deine Grenzen im Team kommunizieren zu können?",
+            "🤝 Bei welchen Teammitgliedern entstehen die lebendigsten Gespräche - warum?",
+            "🔄 Wenn du eine Woche lang eine andere Rolle im Team hättest - welche wäre das?"
+        ];
+
+        const wonderQuestions = [
+            "✨ Stell dir vor, morgen wachst du auf und fühlst dich im Team völlig authentisch und entspannt. Was wäre das erste Zeichen dafür?",
+            "🌟 Wenn alle Teamspannungen über Nacht verschwinden würden - welche deiner Stärken würden plötzlich noch sichtbarer?",
+            "💫 Du wachst morgen auf und hast die ideale Teamrolle. Wie würde dein Arbeitsalltag konkret aussehen?",
+            "⭐ Angenommen, das Team würde perfekt funktionieren - welche deiner jetzigen 'Aufgaben' könntest du endlich abgeben?",
+            "🎭 Wenn du für einen Tag die 'beste Version deiner selbst' im Team wärst - was würden die anderen als erstes bemerken?"
+        ];
+
+        const scalingQuestions = [
+            { text: 'Wie authentisch kannst du aktuell im Team sein?', desc: '1 = Verstelle mich stark, 10 = Völlig authentisch' },
+            { text: 'Wie sehr vertraust du darauf, dass das Team dich trägt?', desc: '1 = Kein Vertrauen, 10 = Volles Vertrauen' },
+            { text: 'Wie wohl fühlst du dich mit deiner aktuellen Teamrolle?', desc: '1 = Sehr unwohl, 10 = Völlig wohl' },
+            { text: 'Wie stark fühlst du dich emotional mit dem Team verbunden?', desc: '1 = Gar nicht verbunden, 10 = Sehr verbunden' },
+            { text: 'Wie gut gelingt es dir, deine Bedürfnisse im Team zu kommunizieren?', desc: '1 = Gar nicht, 10 = Sehr gut' }
+        ];
+
+        // Systemische Analyse-Funktionen
+        function analyzeUserPattern() {
+            const avgStress = members.reduce((sum, m) => sum + m.stress, 0) / members.length;
+            const userMember = members[0]; // Angenommen, erste Person ist der User
+            const userStress = userMember.stress;
+            
+            // Positionsanalyse
+            const centerX = 400, centerY = 300;
+            const userDistance = Math.sqrt(Math.pow(userMember.x - centerX, 2) + Math.pow(userMember.y - centerY, 2));
+            const position = userDistance < 150 ? "zentral" : userDistance < 300 ? "aktiv" : "zurückhaltend";
+            
+            // Rollenerkennung basierend auf Muster
+            let role = "Teammitglied";
+            let pattern = "ausgeglichen";
+            let focus = "Entwicklung";
+            
+            if (userStress >= 4 && position === "zentral") {
+                role = "Harmonisiererin";
+                pattern = "Überforderung durch Vermittlung";
+                focus = "Abgrenzung und Selbstfürsorge";
+            } else if (userStress >= 4 && position === "aktiv") {
+                role = "Antreiberin";
+                pattern = "Hohe Eigenverantwortung";
+                focus = "Vertrauen und Delegation";
+            } else if (userStress <= 2 && position === "zurückhaltend") {
+                role = "Beobachterin";
+                pattern = "Zurückhaltende Teilnahme";
+                focus = "Sichtbarkeit und Initiative";
+            } else if (userStress >= 3 && avgStress < userStress) {
+                role = "Sorgenträgerin";
+                pattern = "Übernimmt emotionale Last";
+                focus = "Emotionale Entlastung";
+            }
+            
+            return { role, pattern, focus, position, userStress };
+        }
+
+        function generateSystemicObservations(pattern) {
+            const observations = {
+                "Harmonisiererin": [
+                    "Beobachte eine Woche lang: Wann übernimmst du automatisch eine vermittelnde Position zwischen anderen?",
+                    "Werde neugierig: Was passiert im Team, wenn du mal 5 Minuten wartest, bevor du eingreifst?",
+                    "Experimentiere: Sage 1x diese Woche direkt 'Das besprechen Sie bitte miteinander' statt zu vermitteln."
+                ],
+                "Antreiberin": [
+                    "Beobachte: In welchen Momenten übergehst du andere mit deinem Tempo?",
+                    "Experimentiere: Warte bei der nächsten Entscheidung bewusst auf andere Meinungen.",
+                    "Frage dich: Was passiert, wenn andere langsamer sind als du? Was ist deine Befürchtung?"
+                ],
+                "Beobachterin": [
+                    "Beobachte: Wann hast du Impulse, dich einzubringen, tust es aber nicht?",
+                    "Experimentiere: Äußere 1x täglich eine Meinung, bevor andere sprechen.",
+                    "Frage dich: Was würde passieren, wenn du sichtbarer wärst?"
+                ],
+                "Sorgenträgerin": [
+                    "Beobachte: Welche Sorgen von anderen trägst du mit, ohne dass sie dich darum gebeten haben?",
+                    "Experimentiere: Gib 1x diese Woche eine Sorge an die Person zurück, der sie gehört.",
+                    "Frage dich: Was müsste passieren, damit andere ihre eigenen Sorgen tragen?"
+                ]
+            };
+            
+            return observations[pattern.role] || observations["Harmonisiererin"];
+        }
+
+        function generateSystemicQuestions(pattern) {
+            const questions = {
+                "Harmonisiererin": [
+                    "Wer hat dir diese Vermittlerrolle ursprünglich übertragen?",
+                    "Was ist der positive Auftrag hinter deiner Harmonisierungsneigung?",
+                    "Wenn du für eine Woche 'Urlaub' von dieser Rolle hättest - wer würde es zuerst merken und wie?",
+                    "Was befürchtest du, würde passieren, wenn du nicht mehr vermittelst?"
+                ],
+                "Antreiberin": [
+                    "Woher kommt dein innerer Antrieb? Wessen Stimme hörst du da?",
+                    "Was ist wertvoll an deiner Energie für das Team?",
+                    "Wann kannst du dein Tempo drosseln, ohne Angst zu haben?",
+                    "Wie würde das Team deine 'langsamere Version' erleben?"
+                ],
+                "Beobachterin": [
+                    "Was ist der Wert deiner beobachtenden Position für das Team?",
+                    "Wann fühlst sich zurückhalten richtig an, wann nicht?",
+                    "Was müsste im Team anders sein, damit du dich sicherer zeigen könntest?",
+                    "Welche wichtigen Dinge siehst du, die andere übersehen?"
+                ],
+                "Sorgenträgerin": [
+                    "Von wem hast du gelernt, dass du für andere mitverantwortlich bist?",
+                    "Was ist der Unterschied zwischen Fürsorge und Überverantwortung?",
+                    "Wem würdest du zutrauen, seine eigenen Sorgen zu tragen?",
+                    "Wie würde sich Erleichterung für dich im Team anfühlen?"
+                ]
+            };
+            
+            return questions[pattern.role] || questions["Harmonisiererin"];
+        }
+
+        function generateSystemicVisualizationSVG() {
+            const svgWidth = 800;
+            const svgHeight = 600;
+            
+            let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <style>
+                        .team-member-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; text-anchor: middle; fill: white; font-weight: bold; }
+                        .stress-1 { fill: #4CAF50; }
+                        .stress-2 { fill: #8BC34A; }
+                        .stress-3 { fill: #FF9800; }
+                        .stress-4 { fill: #FF8F00; }
+                        .stress-5 { fill: #F44336; }
+                        .connection { stroke: rgba(255,255,255,0.6); stroke-width: 3; }
+                        .emoji-text { font-size: 18px; text-anchor: middle; }
+                    </style>
+                    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#1e3c72"/>
+                        <stop offset="100%" style="stop-color:#2a5298"/>
+                    </linearGradient>
+                </defs>
+                
+                <rect width="100%" height="100%" fill="url(#bgGradient)"/>`;
+
+            // Verbindungslinien zeichnen
+            connections.forEach(conn => {
+                const member1 = members.find(m => m.id === conn.member1);
+                const member2 = members.find(m => m.id === conn.member2);
+                
+                if (member1 && member2) {
+                    const distance = Math.sqrt(
+                        Math.pow(member1.x - member2.x, 2) + 
+                        Math.pow(member1.y - member2.y, 2)
+                    );
+                    
+                    if (distance < 400) {
+                        svgContent += `
+                <line x1="${member1.x + 50}" y1="${member1.y + 50}" 
+                      x2="${member2.x + 50}" y2="${member2.y + 50}" 
+                      class="connection"/>
+                
+                <text x="${(member1.x + member2.x) / 2 + 50}" 
+                      y="${(member1.y + member2.y) / 2 + 60}" 
+                      class="emoji-text">${conn.emoji}</text>`;
+                    }
+                }
+            });
+
+            // Team-Mitglieder zeichnen
+            members.forEach(member => {
+                svgContent += `
+                <circle cx="${member.x + 50}" cy="${member.y + 50}" r="40" 
+                        class="stress-${member.stress}" 
+                        stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+                
+                <text x="${member.x + 50}" y="${member.y + 55}" 
+                      class="team-member-text">${member.name.replace(/\n/g, ' ')}</text>`;
+            });
+
+            svgContent += `</svg>`;
+            return svgContent;
+        }
+
+        function exportSystemicWorksheet() {
+            const pattern = analyzeUserPattern();
+            const observations = generateSystemicObservations(pattern);
+            const questions = generateSystemicQuestions(pattern);
+            const svgVisualization = generateSystemicVisualizationSVG();
+            const sessionDate = new Date().toLocaleDateString('de-DE');
+            
+            const worksheetHTML = `<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systemisches Arbeitsblatt - ${sessionDate}</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            max-width: 21cm; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+            color: #333;
+        }
+        .header { 
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px; 
+            text-align: center; 
+            border-radius: 15px; 
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .header h1 { margin: 0; font-size: 2.2em; }
+        .header p { margin: 10px 0 0 0; opacity: 0.9; }
+        .visualization { 
+            text-align: center; 
+            margin: 30px 0; 
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .section { 
+            margin: 30px 0; 
+            padding: 25px; 
+            border-left: 5px solid #4CAF50; 
+            background: #f9f9f9; 
+            border-radius: 0 10px 10px 0;
+        }
+        .section h2 { 
+            color: #1e3c72; 
+            margin-bottom: 15px; 
+            font-size: 1.4em;
+        }
+        .insight-box {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .observation-list, .question-list { 
+            list-style: none; 
+            padding: 0; 
+        }
+        .observation-list li, .question-list li { 
+            margin: 20px 0; 
+            padding: 15px; 
+            background: white; 
+            border-radius: 8px; 
+            border-left: 4px solid #81C784;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .observation-list li::before { 
+            content: "🔍 "; 
+            font-size: 16px; 
+            margin-right: 8px; 
+        }
+        .question-list li::before { 
+            content: "💭 "; 
+            font-size: 16px; 
+            margin-right: 8px; 
+        }
+        .emphasis { 
+            background: #fff3cd; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border-left: 4px solid #ffc107; 
+            margin: 15px 0;
+        }
+        .systemische-note {
+            font-style: italic;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        .role-analysis {
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.1), rgba(42, 82, 152, 0.1));
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .warning-box {
+            background: #fff8e1;
+            border: 1px solid #ffb74d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        @media print { 
+            body { margin: 0; padding: 15px; font-size: 12px; } 
+            .visualization svg { max-width: 18cm; height: auto; }
+            .section { break-inside: avoid; }
+            .header { break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Systemisches Arbeitsblatt</h1>
+        <p><strong>Reflexions-Radar Session vom ${sessionDate}</strong></p>
+        <p>Einladungen zur Selbstbeobachtung und systemischen Reflexion</p>
+    </div>
+    
+    <div class="warning-box">
+        <strong>📝 Systemische Grundhaltung:</strong> Dieses Arbeitsblatt bietet Anregungen, keine Aufträge. 
+        Nutze nur das, was sich für dich stimmig anfühlt. Es ist genauso wertvoll zu beobachten, 
+        warum du etwas nicht ausprobieren möchtest.
+    </div>
+    
+    <div class="visualization">
+        <h2>📊 Deine Selbstwahrnehmung im Team</h2>
+        ${svgVisualization}
+        <p style="margin-top: 15px; font-style: italic; color: #666;">
+            Diese Darstellung zeigt deine subjektive Sicht zum Zeitpunkt der Reflexion. 
+            Andere Teammitglieder würden möglicherweise anders positionieren.
+        </p>
+    </div>
+    
+    <div class="role-analysis">
+        <h2>🎭 Analyse deiner Selbstpositionierung</h2>
+        <p><strong>Erkannte Rolle:</strong> ${pattern.role}</p>
+        <p><strong>Dein Stress-Level:</strong> ${pattern.userStress}/5</p>
+        <p><strong>Position im Team:</strong> ${pattern.position}</p>
+        <p><strong>Muster:</strong> ${pattern.pattern}</p>
+        
+        <div class="insight-box">
+            <h3>🌱 Systemische Hypothese</h3>
+            <p>Deine "${pattern.role}"-Position könnte darauf hindeuten, dass du eine wichtige Funktion 
+            für das Teamsystem übernimmst. Gleichzeitig zeigt dein Stress-Level von ${pattern.userStress}/5, 
+            dass diese Rolle möglicherweise Energie kostet.</p>
+            
+            <p><strong>Neugierige Frage:</strong> <em>Wofür ist deine Position nützlich - 
+            auch wenn sie manchmal anstrengend ist?</em></p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>🔍 Einladungen zur Selbstbeobachtung</h2>
+        <p>Falls es dich interessiert, könntest du in den nächsten Wochen neugierig werden auf:</p>
+        
+        <ul class="observation-list">
+            ${observations.map(obs => `<li>${obs}</li>`).join('')}
+        </ul>
+        
+        <div class="systemische-note">
+            <strong>Systemischer Hintergrund:</strong> Selbstbeobachtung ohne Bewertung ist der erste Schritt 
+            zur Veränderung. Es geht nicht darum, etwas "richtig" oder "falsch" zu machen, sondern 
+            Muster bewusst wahrzunehmen.
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>💭 Systemische Reflexionsfragen</h2>
+        <p>Diese Fragen können dir helfen, deine Rolle im Team besser zu verstehen. 
+        Sie sind als Denkanstöße gedacht, nicht als Aufgaben:</p>
+        
+        <ul class="question-list">
+            ${questions.map(q => `<li>${q}</li>`).join('')}
+        </ul>
+        
+        <div class="systemische-note">
+            <strong>Systemischer Hintergrund:</strong> Zirkuläre und hypothetische Fragen öffnen neue Perspektiven 
+            und helfen dabei, festgefahrene Sichtweisen zu erweitern. Es gibt keine "richtigen" Antworten.
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>🌟 Ressourcen und Kompetenzen</h2>
+        <div class="insight-box">
+            <h3>Deine erkennbaren Stärken:</h3>
+            ${generateResourceText(pattern)}
+            
+            <p style="margin-top: 15px;"><strong>Systemische Frage:</strong> 
+            <em>Wie könntest du diese Stärken noch bewusster einsetzen, ohne dich dabei zu erschöpfen?</em></p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>🎯 Für die systemische Beratung</h2>
+        
+        <h3>📋 Gesprächsvorbereitung:</h3>
+        <ul>
+            <li><strong>Mitbringen:</strong> Deine Beobachtungen aus der Reflexion (falls du welche gemacht hast)</li>
+            <li><strong>Fokus:</strong> ${pattern.focus}</li>
+            <li><strong>Neugierig sein auf:</strong> Alternative Sichtweisen auf deine Teamrolle</li>
+        </ul>
+        
+        <h3>🤔 Mögliche Gesprächsthemen:</h3>
+        <ul>
+            <li>Wie andere deine Rolle wahrnehmen könnten</li>
+            <li>Den Auftrag hinter deiner aktuellen Position erkunden</li>
+            <li>Experimentelle Verhaltensweisen entwickeln</li>
+            <li>Ressourcen für mehr Authentizität im Team finden</li>
+        </ul>
+        
+        <div class="emphasis">
+            <strong>💡 Wichtig:</strong> Dieses Arbeitsblatt zeigt nur einen Moment deiner Selbstwahrnehmung. 
+            In der Beratung können wir gemeinsam erkunden, welche anderen Sichtweisen und Möglichkeiten es gibt.
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>📚 Theoretische Einordnung</h2>
+        <p>Dieses Arbeitsblatt basiert auf folgenden systemischen Ansätzen:</p>
+        <ul>
+            <li><strong>Konstruktivismus:</strong> Deine Sichtweise ist eine von vielen möglichen Realitäten</li>
+            <li><strong>Ressourcenorientierung:</strong> Fokus auf Stärken und Kompetenzen statt auf Defizite</li>
+            <li><strong>Zirkuläre Fragen:</strong> Perspektivwechsel ermöglichen neue Erkenntnisse</li>
+            <li><strong>Lösungsfokussierung:</strong> Kleine Veränderungen können große Wirkung haben</li>
+        </ul>
+        
+        <div class="systemische-note">
+            Verwendete Literatur: Steve de Shazer (Lösungsfokussierung), Michael White (Externalisierung), 
+            Paul Watzlawick (Konstruktivismus), Virginia Satir (Familienskulptur)
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+        <p><strong>🌱 Systemischer Leitsatz:</strong></p>
+        <p style="font-style: italic; font-size: 1.1em; color: #1e3c72;">
+            "Es gibt keine richtigen oder falschen Rollen im Team - nur mehr oder weniger nützliche 
+            für dich und das System."
+        </p>
+    </div>
+    
+</body>
+</html>`;
+
+            // Download der HTML-Datei
+            const blob = new Blob([worksheetHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `systemisches-arbeitsblatt-${sessionDate.replace(/\./g, '-')}.html`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+            
+            // Nutzer informieren
+            showPopup('Systemisches Arbeitsblatt erstellt! 📋', 
+                `Dein personalisiertes Arbeitsblatt wurde als HTML-Datei erstellt und heruntergeladen.<br><br>
+                <strong>📖 Verwendung:</strong><br>
+                • Öffne die Datei in deinem Browser<br>
+                • Drucke sie aus oder speichere als PDF (Strg+P)<br>
+                • Nutze sie als Gesprächsvorbereitung für systemische Beratung<br><br>
+                <strong>🎯 Systemische Grundhaltung:</strong><br>
+                Das Arbeitsblatt bietet Anregungen zur Selbstreflexion, keine Aufträge oder Diagnosen. 
+                Es zeigt deine subjektive Sicht - andere Perspektiven sind genauso wertvoll!`);
+        }
+
+        function generateResourceText(pattern) {
+            const resources = {
+                "Harmonisiererin": `
+                    <ul>
+                        <li>Hohe soziale Sensibilität - du erkennst Spannungen früh</li>
+                        <li>Vermittlungskompetenz - Menschen vertrauen dir</li>
+                        <li>Systemisches Denken - du siehst Verbindungen zwischen Personen</li>
+                        <li>Emotionale Intelligenz - du kannst zwischen verschiedenen "Sprachen" übersetzen</li>
+                    </ul>`,
+                "Antreiberin": `
+                    <ul>
+                        <li>Hohe Eigeninitiative - du bringst Projekte voran</li>
+                        <li>Verantwortungsbereitschaft - du übernimmst, was getan werden muss</li>
+                        <li>Zielorientierung - du behältst das große Ganze im Blick</li>
+                        <li>Motivationsfähigkeit - deine Energie steckt andere an</li>
+                    </ul>`,
+                "Beobachterin": `
+                    <ul>
+                        <li>Reflexionsfähigkeit - du durchdenkst Situationen gründlich</li>
+                        <li>Analytisches Denken - du erkennst Muster und Zusammenhänge</li>
+                        <li>Ruhe und Besonnenheit - du wirkst ausgleichend auf das Team</li>
+                        <li>Qualitätsbewusstsein - du achtest auf Details, die andere übersehen</li>
+                    </ul>`,
+                "Sorgenträgerin": `
+                    <ul>
+                        <li>Empathie und Fürsorge - du spürst, was andere brauchen</li>
+                        <li>Verantwortungsgefühl - du denkst an das Wohl aller</li>
+                        <li>Emotionale Stabilität - andere suchen Halt bei dir</li>
+                        <li>Systemisches Bewusstsein - du denkst in Verbindungen und Abhängigkeiten</li>
+                    </ul>`
+            };
+            
+            return resources[pattern.role] || resources["Harmonisiererin"];
+        }
+
+        // Initialize app
+        function init() {
+            console.log('Initializing enhanced Reflexions-Radar...');
+            try {
+                currentSessionId = 'session_' + Date.now();
+                initConnections();
+                createMembers();
+                updateConnections();
+                updateStats();
+                saveState();
+                
+                setTimeout(() => {
+                    showPopup('Willkommen beim Reflexions-Radar! 🎯', 
+                        `Erkunde deine Position im Team durch Interaktion:<br><br>
+                        • <strong>Kreise anklicken:</strong> Stress-Level ändern<br>
+                        • <strong>Kreise ziehen:</strong> Positionen anpassen<br>
+                        • <strong>Linien anklicken:</strong> Beziehungen charakterisieren<br>
+                        • <strong>Reflexionsfragen nutzen:</strong> Für tiefere Einsichten<br>
+                        • <strong>Arbeitsblatt erstellen:</strong> Für systemische Beratung<br><br>
+                        <em>Deine Perspektive ist subjektiv und wertvoll - es gibt kein "richtig" oder "falsch"!</em>`);
+                }, 1500);
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
+        function saveState() {
+            const state = {
+                members: JSON.parse(JSON.stringify(members)),
+                connections: JSON.parse(JSON.stringify(connections)),
+                timestamp: Date.now()
+            };
+            
+            stateHistory = stateHistory.slice(0, currentStateIndex + 1);
+            stateHistory.push(state);
+            currentStateIndex = stateHistory.length - 1;
+            
+            if (stateHistory.length > 20) {
+                stateHistory.shift();
+                currentStateIndex--;
+            }
+            
+            updateNavigationButtons();
+        }
+
+        function goBack() {
+            if (currentStateIndex > 0) {
+                currentStateIndex--;
+                const state = stateHistory[currentStateIndex];
+                
+                members = JSON.parse(JSON.stringify(state.members));
+                connections = JSON.parse(JSON.stringify(state.connections));
+                
+                createMembers();
+                updateConnections();
+                updateStats();
+                updateNavigationButtons();
+            }
+        }
+
+        function goForward() {
+            if (currentStateIndex < stateHistory.length - 1) {
+                currentStateIndex++;
+                const state = stateHistory[currentStateIndex];
+                
+                members = JSON.parse(JSON.stringify(state.members));
+                connections = JSON.parse(JSON.stringify(state.connections));
+                
+                createMembers();
+                updateConnections();
+                updateStats();
+                updateNavigationButtons();
+            }
+        }
+
+        function updateNavigationButtons() {
+            const backBtn = document.getElementById('backBtn');
+            const forwardBtn = document.getElementById('forwardBtn');
+            
+            if (backBtn) {
+                backBtn.disabled = currentStateIndex <= 0;
+                backBtn.style.opacity = currentStateIndex > 0 ? '1' : '0.5';
+            }
+            
+            if (forwardBtn) {
+                forwardBtn.disabled = currentStateIndex >= stateHistory.length - 1;
+                forwardBtn.style.opacity = currentStateIndex < stateHistory.length - 1 ? '1' : '0.5';
+            }
+        }
+
+        function initConnections() {
+            connections = [];
+            for (let i = 0; i < members.length; i++) {
+                for (let j = i + 1; j < members.length; j++) {
+                    connections.push({
+                        id: `${members[i].id}-${members[j].id}`,
+                        member1: members[i].id,
+                        member2: members[j].id,
+                        emoji: '🤝'
+                    });
+                }
+            }
+        }
+
+        function createMembers() {
+            const workspace = document.getElementById('workspace');
+            document.querySelectorAll('.team-member').forEach(el => el.remove());
+            
+            members.forEach(member => {
+                const div = document.createElement('div');
+                div.className = `team-member stress-${member.stress}`;
+                div.style.left = member.x + 'px';
+                div.style.top = member.y + 'px';
+                div.style.position = 'absolute';
+                div.textContent = member.name;
+                div.dataset.id = member.id;
+                
+                // Add delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '×';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteMember(member.id);
+                };
+                div.appendChild(deleteBtn);
+                
+                div.addEventListener('mousedown', startDrag);
+                div.addEventListener('click', changeStress);
+                div.addEventListener('dblclick', editName);
+                
+                // Touch events für mobile Geräte
+                div.addEventListener('touchstart', handleTouch);
+                div.addEventListener('touchmove', handleTouchMove);
+                div.addEventListener('touchend', handleTouchEnd);
+                
+                workspace.appendChild(div);
+            });
+        }
+
+        // Touch-Event-Handler für mobile Unterstützung
+        let touchStartTime = 0;
+        let touchMoved = false;
+
+        function handleTouch(e) {
+            touchStartTime = Date.now();
+            touchMoved = false;
+            startDrag(e.touches ? e.touches[0] : e);
+        }
+
+        function handleTouchMove(e) {
+            touchMoved = true;
+            drag(e.touches ? e.touches[0] : e);
+        }
+
+        function handleTouchEnd(e) {
+            const touchDuration = Date.now() - touchStartTime;
+            stopDrag();
+            
+            // Wenn kurzer Tap ohne Bewegung, dann Stress ändern
+            if (touchDuration < 200 && !touchMoved) {
+                changeStress(e);
+            }
+        }
+
+        function deleteMember(memberId) {
+            if (members.length <= 2) {
+                showPopup('Hinweis', 'Mindestens 2 Personen müssen im Team bleiben für eine sinnvolle Reflexion.');
+                return;
+            }
+            
+            if (confirm('Person wirklich aus der Konstellation entfernen?')) {
+                members = members.filter(m => m.id !== memberId);
+                connections = connections.filter(c => 
+                    c.member1 !== memberId && c.member2 !== memberId
+                );
+                
+                createMembers();
+                updateConnections();
+                updateStats();
+                saveState();
+            }
+        }
+
+        function updateConnections() {
+            document.querySelectorAll('.connection-line, .connection-emoji').forEach(el => el.remove());
+            
+            const workspace = document.getElementById('workspace');
+            
+            connections.forEach(connection => {
+                const member1 = members.find(m => m.id === connection.member1);
+                const member2 = members.find(m => m.id === connection.member2);
+                
+                if (!member1 || member2) return;
+                
+                const distance = Math.sqrt(
+                    Math.pow(member1.x - member2.x, 2) + 
+                    Math.pow(member1.y - member2.y, 2)
+                );
+                
+                if (distance < 400) {
+                    // Create line
+                    const line = document.createElement('div');
+                    line.className = 'connection-line';
+                    
+                    const angle = Math.atan2(member2.y - member1.y, member2.x - member1.x);
+                    const startX = member1.x + 50;
+                    const startY = member1.y + 50;
+                    
+                    line.style.left = startX + 'px';
+                    line.style.top = startY + 'px';
+                    line.style.width = distance + 'px';
+                    line.style.transform = `rotate(${angle}rad)`;
+                    
+                    line.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editEmoji(connection.id);
+                    });
+                    
+                    workspace.appendChild(line);
+                    
+                    // Create emoji
+                    const emojiDiv = document.createElement('div');
+                    emojiDiv.className = 'connection-emoji';
+                    emojiDiv.textContent = connection.emoji;
+                    
+                    const midX = startX + (distance / 2) * Math.cos(angle);
+                    const midY = startY + (distance / 2) * Math.sin(angle);
+                    
+                    emojiDiv.style.left = midX + 'px';
+                    emojiDiv.style.top = midY + 'px';
+                    emojiDiv.style.transform = 'translate(-50%, -50%)';
+                    
+                    emojiDiv.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editEmoji(connection.id);
+                    });
+                    
+                    workspace.appendChild(emojiDiv);
+                }
+            });
+        }
+
+        function startDrag(e) {
+            if (e.detail === 2) return; // Ignore double-clicks
+            
+            isDragging = true;
+            dragElement = e.target.closest('.team-member');
+            
+            const rect = dragElement.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            dragOffset.x = clientX - rect.left;
+            dragOffset.y = clientY - rect.top;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', stopDrag);
+            
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging || !dragElement) return;
+            
+            const workspace = document.getElementById('workspace');
+            const workspaceRect = workspace.getBoundingClientRect();
+            
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            let newX = clientX - workspaceRect.left - dragOffset.x;
+            let newY = clientY - workspaceRect.top - dragOffset.y;
+            
+            newX = Math.max(0, Math.min(newX, workspaceRect.width - 100));
+            newY = Math.max(0, Math.min(newY, workspaceRect.height - 100));
+            
+            dragElement.style.left = newX + 'px';
+            dragElement.style.top = newY + 'px';
+            
+            const memberId = parseInt(dragElement.dataset.id);
+            const member = members.find(m => m.id === memberId);
+            if (member) {
+                member.x = newX;
+                member.y = newY;
+            }
+            
+            updateConnections();
+            e.preventDefault();
+        }
+
+        function stopDrag() {
+            if (isDragging) {
+                saveState();
+            }
+            
+            isDragging = false;
+            dragElement = null;
+            
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        function changeStress(e) {
+            if (isDragging) return;
+            
+            e.stopPropagation();
+            
+            const memberId = parseInt(e.target.closest('.team-member').dataset.id);
+            const member = members.find(m => m.id === memberId);
+            
+            if (member) {
+                member.stress = (member.stress % 5) + 1;
+                e.target.closest('.team-member').className = `team-member stress-${member.stress}`;
+                updateStats();
+                saveState();
+                
+                // Systemische Rückmeldung
+                setTimeout(() => {
+                    if (member.stress === 5) {
+                        showPopup('Systemische Reflexion', 
+                            `Stress-Level 5 erreicht. Was könnte diesem Teil des Systems helfen? 
+                            Welche Unterstützung bräuchte diese Position?`);
+                    } else if (member.stress === 1) {
+                        showPopup('Systemische Reflexion', 
+                            `Ein entspanntes Element im System. Was trägt zu dieser Ruhe bei? 
+                            Wie wirkt sich das auf andere aus?`);
+                    }
+                }, 500);
+            }
+        }
+
+        function editName(e) {
+            e.stopPropagation();
+            
+            const memberId = parseInt(e.target.dataset.id);
+            const member = members.find(m => m.id === memberId);
+            
+            if (member) {
+                const newName = prompt('Name der Person (z.B. "Anna (Rolle)"):', member.name.replace(/\n/g, ' '));
+                if (newName !== null && newName.trim() !== '') {
+                    member.name = newName.trim();
+                    e.target.textContent = member.name;
+                    saveState();
+                }
+            }
+        }
+
+        function editEmoji(connectionId) {
+            const connection = connections.find(c => c.id === connectionId);
+            if (!connection) return;
+            
+            const emojis = ['🤝', '💚', '❤️', '⚡', '🌱', '🌟', '🔥', '❄️', '🤔', '😕', '😤', '🙄', '💭', '🎭', '🌊'];
+            const choice = prompt(`Wie würdest du diese Beziehung charakterisieren?\n\nVerfügbare Emojis:\n${emojis.join(' ')}\n\nGib ein Emoji ein oder wähle aus der Liste.\nAktuell: ${connection.emoji}`);
+            
+            if (choice && choice.trim()) {
+                connection.emoji = choice.trim();
+                updateConnections();
+                saveState();
+                
+                setTimeout(() => {
+                    showEmojiReflection(choice.trim());
+                }, 300);
+            }
+        }
+
+        function showEmojiReflection(emoji) {
+            let reflection = '';
+            
+            if (['💚', '❤️', '🌟', '🤝'].includes(emoji)) {
+                reflection = `Du hast ${emoji} gewählt - eine nährende Beziehung. Was genau macht diese Verbindung so wertvoll für das System?`;
+            } else if (['⚡', '🔥', '🌱'].includes(emoji)) {
+                reflection = `${emoji} deutet auf Energie und Dynamik hin. Welches Potential siehst du in dieser Beziehung?`;
+            } else if (['🤔', '😕', '❄️', '💭'].includes(emoji)) {
+                reflection = `Mit ${emoji} zeigst du Nachdenklichkeit. Was ist hier im Entstehen oder in der Klärung?`;
+            } else if (['😤', '🙄'].includes(emoji)) {
+                reflection = `${emoji} zeigt Reibung an. Systemisch betrachtet: Was ist der positive Kern hinter dieser Spannung?`;
+            } else {
+                reflection = `Interessante Wahl: ${emoji}. Was erzählt dir dieses Symbol über die Qualität dieser Beziehung?`;
+            }
+            
+            showPopup('Beziehungsreflexion 🔍', reflection);
+        }
+
+        function addPerson() {
+            const personName = prompt('Name der neuen Person:', 'Neue Person');
+            if (!personName || personName.trim() === '') return;
+            
+            const newMember = {
+                id: nextId++,
+                name: personName.trim(),
+                x: 100 + Math.random() * 400,
+                y: 100 + Math.random() * 300,
+                stress: 2
+            };
+            
+            members.push(newMember);
+            
+            // Neue Verbindungen zu allen bestehenden Mitgliedern
+            members.forEach(existingMember => {
+                if (existingMember.id !== newMember.id) {
+                    connections.push({
+                        id: `${Math.min(newMember.id, existingMember.id)}-${Math.max(newMember.id, existingMember.id)}`,
+                        member1: newMember.id,
+                        member2: existingMember.id,
+                        emoji: '🤝'
+                    });
+                }
+            });
+            
+            createMembers();
+            updateConnections();
+            updateStats();
+            saveState();
+        }
+
+        function updateStats() {
+            const avgStress = members.reduce((sum, m) => sum + m.stress, 0) / members.length;
+            const overloaded = members.filter(m => m.stress >= 4).length;
+            
+            document.getElementById('avgStress').textContent = 
+                avgStress <= 2 ? 'Niedrig' : avgStress <= 3 ? 'Mittel' : 'Hoch';
+            document.getElementById('overloaded').textContent = overloaded;
+        }
+
+        function showReflection() {
+            const question = reflections[Math.floor(Math.random() * reflections.length)];
+            showQuestionWithInput('Systemische Reflexion', question);
+        }
+
+        function showWonder() {
+            const question = wonderQuestions[Math.floor(Math.random() * wonderQuestions.length)];
+            showQuestionWithInput('Lösungsfokussierte Wunderfrage', question);
+        }
+
+        function showScaling() {
+            const question = scalingQuestions[Math.floor(Math.random() * scalingQuestions.length)];
+            showScalingPopup(question);
+        }
+
+        function showQuestionWithInput(title, question) {
+            document.querySelectorAll('.popup').forEach(p => p.remove());
+            
+            const questionId = 'q_' + Date.now();
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+                <h3>${title}</h3>
+                <p>${question}</p>
+                
+                <textarea class="text-response-area" id="response_${questionId}" 
+                          placeholder="Deine Gedanken dazu... (max. 140 Zeichen)" 
+                          maxlength="140"></textarea>
+                <div class="char-counter" id="counter_${questionId}">0/140</div>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn" onclick="submitResponse('${questionId}', '${title}')">Gedanken festhalten</button>
+                    <button class="btn" onclick="this.parentElement.remove()" style="margin-left: 10px;">Überspringen</button>
+                </div>
+                
+                <div id="aiResponse_${questionId}"></div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            const textarea = document.getElementById(`response_${questionId}`);
+            const counter = document.getElementById(`counter_${questionId}`);
+            
+            textarea.addEventListener('input', function() {
+                const length = this.value.length;
+                counter.textContent = `${length}/140`;
+                
+                if (length > 120) {
+                    counter.className = 'char-counter error';
+                } else if (length > 100) {
+                    counter.className = 'char-counter warning';
+                } else {
+                    counter.className = 'char-counter';
+                }
+            });
+            
+            textarea.focus();
+        }
+
+        function submitResponse(questionId, questionType) {
+            const textarea = document.getElementById(`response_${questionId}`);
+            const response = textarea.value.trim();
+            
+            if (!response) {
+                alert('Bitte teile deine Gedanken mit, auch wenn sie nur fragmentarisch sind.');
+                return;
+            }
+            
+            userResponses.push({
+                id: questionId,
+                type: questionType,
+                response: response,
+                timestamp: new Date()
+            });
+            
+            const aiResponse = generateSystemicResponse(response);
+            
+            const aiContainer = document.getElementById(`aiResponse_${questionId}`);
+            aiContainer.innerHTML = `<div class="ai-response">${aiResponse}</div>`;
+            
+            textarea.disabled = true;
+            textarea.style.opacity = '0.6';
+        }
+
+        function generateSystemicResponse(userResponse) {
+            const words = userResponse.toLowerCase().split(' ');
+            
+            // Systemische Antworten statt direktive
+            if (words.some(w => ['stress', 'müde', 'erschöpft', 'überlastet', 'anstrengend'].includes(w))) {
+                return "Ich höre, dass da viel Energie fließt. Was wäre ein kleiner Schritt in Richtung mehr Selbstfürsorge, ohne das System zu vernachlässigen?";
+            } else if (words.some(w => ['gut', 'stark', 'stolz', 'positiv', 'freue'].includes(w))) {
+                return "Schön, dass du diese Stärke spürst! Wie könntest du sie noch bewusster als Ressource für dich und das Team nutzen?";
+            } else if (words.some(w => ['team', 'kollegen', 'andere', 'zusammen'].includes(w))) {
+                return "Du denkst in Beziehungen und Systemen! Was ist dein ganz eigener, einzigartiger Beitrag zu dieser Dynamik?";
+            } else if (words.some(w => ['schwierig', 'problem', 'konflikt', 'ärger'].includes(w))) {
+                return "Herausforderungen zeigen oft, wo Entwicklung möglich ist. Welche versteckte Kompetenz verwendest du beim Umgang damit?";
+            } else if (words.some(w => ['rolle', 'position', 'verantwortung'].includes(w))) {
+                return "Rollen sind oft nützlich, auch wenn sie manchmal einengen. Wofür ist deine aktuelle Position wertvoll?";
+            } else {
+                const systemicResponses = [
+                    "Was ist das Wichtigste, was du aus deiner Reflexion mitnehmen möchtest?",
+                    "Wenn sich das, was du beschreibst, um 10% verbessern würde - woran würdest du es als erstes merken?",
+                    "Was würde jemand, der dich wertschätzt, zu deinen Gedanken sagen?",
+                    "Welche Ressource in dir wird durch deine Beobachtung sichtbar?",
+                    "Was würde sich ändern, wenn andere diese Perspektive von dir kennen würden?"
+                ];
+                return systemicResponses[Math.floor(Math.random() * systemicResponses.length)];
+            }
+        }
+
+        function showScalingPopup(question) {
+            document.querySelectorAll('.popup').forEach(p => p.remove());
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+                <h3>📊 Systemische Skalierung</h3>
+                <p><strong>${question.text}</strong></p>
+                <p style="font-size: 14px; color: #ccc;">${question.desc}</p>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <input type="range" min="1" max="10" value="5" id="scaleSlider" 
+                           style="width: 100%; margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px;">
+                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                    </div>
+                    <div style="font-size: 32px; font-weight: bold; color: #4CAF50; margin: 20px 0;" id="currentVal">5</div>
+                    <div style="font-size: 14px; color: #ccc; font-style: italic;" id="scaleDescription">
+                        Bewege den Regler und spüre in dich hinein...
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="submitScaling()">Wert übernehmen</button>
+                    <button class="btn" onclick="this.parentElement.remove()" style="margin-left: 10px;">Überspringen</button>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            const slider = document.getElementById('scaleSlider');
+            const valueDisplay = document.getElementById('currentVal');
+            const description = document.getElementById('scaleDescription');
+            
+            slider.addEventListener('input', function() {
+                const val = parseInt(this.value);
+                valueDisplay.textContent = val;
+                
+                // Farbe ändern
+                if (val <= 3) {
+                    valueDisplay.style.color = '#F44336';
+                    description.textContent = 'Hier ist Raum für Entwicklung...';
+                } else if (val <= 6) {
+                    valueDisplay.style.color = '#FF9800';
+                    description.textContent = 'Ein solider Ausgangspunkt...';
+                } else {
+                    valueDisplay.style.color = '#4CAF50';
+                    description.textContent = 'Eine starke Basis!';
+                }
+            });
+        }
+
+        function submitScaling() {
+            const slider = document.getElementById('scaleSlider');
+            const value = parseInt(slider.value);
+            
+            // Skalierungswert zu Antworten hinzufügen
+            userResponses.push({
+                id: 'scaling_' + Date.now(),
+                type: 'Skalierung',
+                response: `Bewertung: ${value}/10`,
+                timestamp: new Date()
+            });
+            
+            document.querySelector('.popup').remove();
+            
+            // Systemische Rückmeldung basierend auf Wert
+            let feedback = '';
+            if (value <= 3) {
+                feedback = `Ein Wert von ${value} zeigt Potenzial für Entwicklung. Was wäre dein allerkleinster nächster Schritt zu ${value + 1}?`;
+            } else if (value <= 6) {
+                feedback = `${value} ist ein ehrlicher Wert. Was ist bereits vorhanden, das dich zu diesem Level gebracht hat?`;
+            } else {
+                feedback = `Ein starker Wert von ${value}! Wie könntest du diese Erfahrung stabilisieren oder sogar noch verstärken?`;
+            }
+            
+            setTimeout(() => {
+                showPopup('Systemische Skalierungs-Reflexion 📊', feedback);
+            }, 300);
+        }
+
+        function showPopup(title, message) {
+            document.querySelectorAll('.popup').forEach(p => p.remove());
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+                <h3>${title}</h3>
+                <p>${message}</p>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn" onclick="this.parentElement.remove()">Verstanden</button>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            // Auto-close nach 8 Sekunden
+            setTimeout(() => {
+                if (popup.parentElement) {
+                    popup.remove();
+                }
+            }, 8000);
+        }
+
+        function showSessionSummary() {
+            if (userResponses.length === 0) {
+                showPopup('Session-Übersicht 📄', 
+                    'Du hast in dieser Session noch keine Reflexionsfragen beantwortet.<br><br>' +
+                    'Probiere die Reflexions-, Wunder- oder Skalierungsfragen aus, um Einblicke in deine Teamdynamiken zu gewinnen!');
+                return;
+            }
+            
+            generateSessionReport();
+        }
+
+        function generateSessionReport() {
+            const now = new Date();
+            const sessionTitle = `Reflexions-Session vom ${now.toLocaleDateString('de-DE')} um ${now.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}`;
+            
+            let reportHTML = `
+                <div class="session-header">
+                    <h3>${sessionTitle}</h3>
+                    <p>Deine systemische Selbstreflexion</p>
+                </div>
+                
+                <div class="session-summary">
+            `;
+            
+            // Team-Status
+            const avgStress = members.reduce((sum, m) => sum + m.stress, 0) / members.length;
+            const highStressCount = members.filter(m => m.stress >= 4).length;
+            
+            reportHTML += `
+                <div class="session-section">
+                    <h4>🎯 Deine Team-Konstellation</h4>
+                    <p><strong>Durchschnittliches Stress-Level:</strong> ${avgStress.toFixed(1)}/5</p>
+                    <p><strong>Hochbelastete Positionen:</strong> ${highStressCount}</p>
+                    <p><strong>Team-Größe:</strong> ${members.length} Personen</p>
+                    <p><em>Diese Konstellation zeigt deine subjektive Wahrnehmung zum jetzigen Zeitpunkt.</em></p>
+                </div>
+            `;
+            
+            // Beziehungsqualitäten
+            const emojiCounts = {};
+            connections.forEach(conn => {
+                emojiCounts[conn.emoji] = (emojiCounts[conn.emoji] || 0) + 1;
+            });
+            
+            reportHTML += `
+                <div class="session-section">
+                    <h4>🤝 Beziehungscharakterisierung</h4>
+                    <p><strong>Deine Beziehungsemojis:</strong> ${Object.keys(emojiCounts).map(emoji => `${emoji} (${emojiCounts[emoji]}x)`).join(', ')}</p>
+                    <p><em>Wie charakterisierst du die Verbindungen in deinem Team?</em></p>
+                </div>
+            `;
+            
+            // Reflexionsantworten
+            reportHTML += `<div class="session-section"><h4>💭 Deine Reflexionen</h4>`;
+            
+            const groupedResponses = {};
+            userResponses.forEach(resp => {
+                if (!groupedResponses[resp.type]) {
+                    groupedResponses[resp.type] = [];
+                }
+                groupedResponses[resp.type].push(resp);
+            });
+            
+            Object.keys(groupedResponses).forEach(type => {
+                reportHTML += `<p><strong>${type}:</strong></p><ul style="margin-left: 20px;">`;
+                groupedResponses[type].forEach(resp => {
+                    reportHTML += `<li style="margin: 8px 0;">"${resp.response}"</li>`;
+                });
+                reportHTML += `</ul>`;
+            });
+            
+            reportHTML += `</div>`;
+            
+            // Systemische Erkenntnisse
+            reportHTML += `
+                <div class="session-section">
+                    <h4>🌱 Systemische Beobachtungen</h4>
+                    <p>${generateSystemicInsights()}</p>
+                    <p><em>Diese Beobachtungen sind Einladungen zum Weiterdenken, nicht als Diagnosen zu verstehen.</em></p>
+                </div>
+            `;
+            
+            reportHTML += `</div>`;
+            
+            showSessionReportPopup(reportHTML, sessionTitle);
+        }
+
+        function generateSystemicInsights() {
+            const insights = [];
+            const pattern = analyzeUserPattern();
+            
+            insights.push(`Du hast dich als "${pattern.role}" positioniert mit einem Stress-Level von ${pattern.userStress}/5.`);
+            
+            const avgStress = members.reduce((sum, m) => sum + m.stress, 0) / members.length;
+            if (avgStress > 3.5) {
+                insights.push("Das System trägt aktuell hohe Belastungen - ein Zeichen für Entwicklungsbedarf oder intensiven Wandel.");
+            } else if (avgStress < 2) {
+                insights.push("Das System zeigt eine entspannte Grundhaltung - Raum für Kreativität und Wachstum.");
+            }
+            
+            const responseTopics = userResponses.map(r => r.response.toLowerCase()).join(' ');
+            if (responseTopics.includes('stress') || responseTopics.includes('müde') || responseTopics.includes('anstrengend')) {
+                insights.push("Selbstfürsorge und Grenzen sind wichtige Themen in deiner Reflexion.");
+            }
+            if (responseTopics.includes('team') || responseTopics.includes('andere') || responseTopics.includes('zusammen')) {
+                insights.push("Du denkst systemisch und beziehungsorientiert - eine wertvolle Perspektive.");
+            }
+            if (responseTopics.includes('rolle') || responseTopics.includes('verantwortung')) {
+                insights.push("Rollen und Verantwortlichkeiten beschäftigen dich - ein Zeichen für Entwicklungspotential.");
+            }
+            
+            return insights.join(' ');
+        }
+
+        function showSessionReportPopup(reportHTML, title) {
+            document.querySelectorAll('.popup').forEach(p => p.remove());
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.style.maxWidth = '700px';
+            popup.style.maxHeight = '80vh';
+            popup.innerHTML = `
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+                ${reportHTML}
+                <div style="text-align: center; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
+                    <button class="btn export-btn" onclick="exportSessionReport()" style="margin-right: 10px;">📄 Session exportieren</button>
+                    <button class="btn" onclick="this.parentElement.remove()">Schließen</button>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+        }
+
+        function exportSessionReport() {
+            const now = new Date();
+            const title = `Reflexions-Session vom ${now.toLocaleDateString('de-DE')}`;
+            
+            let exportText = `${title}\n`;
+            exportText += '='.repeat(title.length) + '\n\n';
+            
+            // Team-Status
+            const avgStress = members.reduce((sum, m) => sum + m.stress, 0) / members.length;
+            const highStressCount = members.filter(m => m.stress >= 4).length;
+            
+            exportText += `TEAM-KONSTELLATION (subjektive Wahrnehmung)\n`;
+            exportText += `-----------------------------------------\n`;
+            exportText += `Durchschnittliches Stress-Level: ${avgStress.toFixed(1)}/5\n`;
+            exportText += `Hochbelastete Positionen: ${highStressCount}\n`;
+            exportText += `Team-Größe: ${members.length} Personen\n\n`;
+            
+            // Reflexionsantworten
+            exportText += `REFLEXIONSANTWORTEN\n`;
+            exportText += `-------------------\n`;
+            userResponses.forEach((resp, index) => {
+                exportText += `${index + 1}. ${resp.type}\n`;
+                exportText += `"${resp.response}"\n\n`;
+            });
+            
+            // Systemische Beobachtungen
+            exportText += `SYSTEMISCHE BEOBACHTUNGEN\n`;
+            exportText += `-------------------------\n`;
+            exportText += `${generateSystemicInsights()}\n\n`;
+            
+            exportText += `HINWEIS\n`;
+            exportText += `-------\n`;
+            exportText += `Diese Reflexion zeigt deine subjektive Wahrnehmung zu einem bestimmten Zeitpunkt.\n`;
+            exportText += `Andere Teammitglieder könnten das System anders sehen - alle Perspektiven sind wertvoll.\n`;
+            exportText += `Nutze diese Erkenntnisse als Gesprächsöffner für systemische Beratung oder Teamentwicklung.\n`;
+            
+            // Create download
+            const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `reflexions-session-${now.toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showPopup('Session exportiert! 📄', 
+                'Deine Reflexions-Session wurde als Textdatei gespeichert und kann als Grundlage für weitere systemische Arbeit verwendet werden.');
+        }
+
+        function resetAll() {
+            if (confirm('Möchtest du wirklich eine neue Session beginnen? Alle aktuellen Daten gehen verloren.')) {
+                members = [
+                    { id: 1, name: 'Anna\n(Projektleitung)', x: 200, y: 150, stress: 4 },
+                    { id: 2, name: 'Marcus\n(Entwicklung)', x: 400, y: 250, stress: 3 },
+                    { id: 3, name: 'Sarah\n(Design)', x: 300, y: 400, stress: 1 },
+                    { id: 4, name: 'Tom\n(QA)', x: 600, y: 200, stress: 2 }
+                ];
+                nextId = 5;
+                userResponses = [];
+                stateHistory = [];
+                currentStateIndex = -1;
+                currentSessionId = 'session_' + Date.now();
+                
+                initConnections();
+                createMembers();
+                updateConnections();
+                updateStats();
+                saveState();
+                
+                showPopup('Neue Session gestartet! 🔄', 
+                    'Du kannst jetzt eine frische Reflexion beginnen. Alle vorherigen Daten wurden zurückgesetzt.');
+            }
+        }
+
+        // Start the enhanced app
+        window.addEventListener('load', init);
+        
+        // Prevent context menu on touch devices
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.closest('.team-member')) {
+                e.preventDefault();
+            }
+        });
+        
+        // Improve touch scrolling
+        document.addEventListener('touchmove', function(e) {
+            if (e.target.closest('.team-member') && isDragging) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+    </script>
+</body>
+</html>
+            
